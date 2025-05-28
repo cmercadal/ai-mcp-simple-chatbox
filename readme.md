@@ -30,17 +30,18 @@ pip install uv
 ````
 
 Then initialize uv. this will create a project.toml file, what uv uses to define project's dependencies and configurations.
-````
+```
 uv init
 ```
 Install dependencies:
+
 ```
 uv add mcp arxiv
 ```
 And run the inspector:
-````
+```
 npx @modelcontextprotocol/inspector uv run research_server.py
 ```
 
 Note that for the inspector you will need node.js in your local. 
-Source: https://github.com/modelcontextprotocol/inspector
+> Source: https://github.com/modelcontextprotocol/inspector
