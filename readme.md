@@ -20,6 +20,27 @@ pip install -r requirements.txt
 python main.py
 ```
 
+### Running the server
 
+With the class research_server.py we are creating the server for our model. You can test it with an inspector (with no need of the client of our model). Primitivs will be shown (tools, resources, prompts)... For me, kind of a swagger that helps you to understand what is created on the back.
 
+First you will need to install uv
+````
+pip install uv
+````
 
+Then initialize uv. this will create a project.toml file, what uv uses to define project's dependencies and configurations.
+````
+uv init
+```
+Install dependencies:
+```
+uv add mcp arxiv
+```
+And run the inspector:
+````
+npx @modelcontextprotocol/inspector uv run research_server.py
+```
+
+Note that for the inspector you will need node.js in your local. 
+Source: https://github.com/modelcontextprotocol/inspector
