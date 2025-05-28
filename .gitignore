@@ -1,0 +1,9 @@
+__pycache__/
+venv/
+
+/papers/*
+.env
+
+#will be used later
+server_config.json
+research_server.py
