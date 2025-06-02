@@ -1,82 +1,56 @@
 from typing import List
 from dotenv import load_dotenv
 from tool_mapping import execute_tool, tools
-from groq import Groq
-import os
-import json
+from research_server import mcp
+import asyncio
+from mcp_client import MCP_ChatBot
+import sys
+import signal
 
-load_dotenv() 
-groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+def run_mcp_server():
+    try:
+        print("Starting MCP server...")
+        mcp.run(transport='stdio', log_level="INFO")
+    except Exception as e:
+        print(f"Error running MCP server: {str(e)}")
+        sys.exit(1)
 
-def process_query(query):
-    messages = [{'role': 'user', 'content': query}]
-    
-    # Create the chat completion with tools
-    response = groq_client.chat.completions.create(
-        model="llama-3.1-8b-instant",
-        messages=messages,
-        tools=tools,
-        tool_choice="auto",
-        max_tokens=2024
-    )
-    
-    process_query = True
-    while process_query:
-        assistant_message = response.choices[0].message
-        
-        # Handle text response
-        if assistant_message.content:
-            print(assistant_message.content)
-            process_query = False
-            
-        # Handle tool calls
-        if assistant_message.tool_calls:
-            for tool_call in assistant_message.tool_calls:
-                tool_name = tool_call.function.name
-                tool_args = json.loads(tool_call.function.arguments)
-                
-                print(f"Calling tool {tool_name} with args {tool_args}")
-                
-                # Execute the tool
-                result = execute_tool(tool_name, tool_args)
-                
-                # Add the tool response to messages
-                messages.append({
-                    "role": "assistant",
-                    "content": None,
-                    "tool_calls": [tool_call]
-                })
-                
-                messages.append({
-                    "role": "tool",
-                    "tool_call_id": tool_call.id,
-                    "content": json.dumps(result)
-                })
-                
-                # Get new response from Groq
-                response = groq_client.chat.completions.create(
-                    model="llama-3.1-8b-instant",
-                    messages=messages,
-                    tools=tools,
-                    tool_choice="auto",
-                    max_tokens=2024
-                )
+async def main():
+    # Set up signal handlers for graceful shutdown
+    loop = asyncio.get_running_loop()
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        loop.add_signal_handler(sig, lambda: asyncio.create_task(shutdown()))
 
-def chat_loop():
-    print("Type your queries or 'quit' to exit.")
-    while True:
+    chatbot = MCP_ChatBot()
+    try:
+        print("Connecting to servers...")
+        await chatbot.connect_to_servers()
+        print("Starting chat loop...")
+        await chatbot.chat_loop()
+    except KeyboardInterrupt:
+        print("\nShutting down gracefully...")
+    except Exception as e:
+        print(f"\nError occurred: {str(e)}")
+    finally:
         try:
-            query = input("\nQuery: ").strip()
-            if query.lower() == 'quit':
-                break
-    
-            process_query(query)
-            print("\n")
+            print("Cleaning up resources...")
+            await chatbot.cleanup()
         except Exception as e:
-            print(f"\nError: {str(e)}")
+            print(f"Error during cleanup: {str(e)}")
 
-def main():
-    chat_loop()
+async def shutdown():
+    print("\nShutdown signal received...")
+    tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+    [task.cancel() for task in tasks]
+    await asyncio.gather(*tasks, return_exceptions=True)
+    loop = asyncio.get_running_loop()
+    loop.stop()
 
 if __name__ == "__main__":
-    main()
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nProgram terminated by user.")
+    except Exception as e:
+        print(f"\nFatal error: {str(e)}")
+        sys.exit(1)

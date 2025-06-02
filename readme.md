@@ -22,7 +22,7 @@ python main.py
 
 ### Running the server
 
-With the class research_server.py we are creating the server for our model. You can test it with an inspector (with no need of the client of our model). Primitivs will be shown (tools, resources, prompts)... For me, kind of a swagger that helps you to understand what is created on the back.
+With the class research_server.py we are creating the server for our model, that exposes two tools. You can test it with an inspector (with no need of the client of our model). Primitivs will be shown (tools, resources, prompts)... For me, kind of a swagger that helps you to understand what is created on the back.
 
 First you will need to install uv
 ````
@@ -45,3 +45,26 @@ npx @modelcontextprotocol/inspector uv run research_server.py
 
 Note that for the inspector you will need node.js in your local. 
 > Source: https://github.com/modelcontextprotocol/inspector
+
+
+## MCP Client
+
+MCP CLient will allow the server to communicate with the chatbox.
+
+
+## Connecting to different servers
+
+https://github.com/modelcontextprotocol/servers
+In this example we have added servers filesystem and fetch (as listed in server_config.json)
+
+Run with 
+```
+uv run main.py
+```
+
+
+## References
+
+https://modelcontextprotocol.io/introduction
+https://github.com/modelcontextprotocol/python-sdk/blob/main/examples/clients/simple-chatbot/README.MD 
+https://github.com/modelcontextprotocol/python-sdk/blob/main/examples/clients/simple-chatbot/mcp_simple_chatbot/main.py 

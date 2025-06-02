@@ -3,6 +3,3 @@ venv/
 
 /papers/*
 .env
-
-#will be used later
-server_config.json

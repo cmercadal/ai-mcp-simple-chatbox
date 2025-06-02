@@ -1,5 +1,5 @@
 import json
-from mcp_chatbox import search_papers, extract_info
+from research_server import search_papers, extract_info
 
 tools = [
     {
