@@ -153,6 +153,7 @@ class MCP_ChatBot:
             raise
 
     async def chat_loop(self):
+        """Main chat loop for user interaction."""
         print("\nMCP Chatbot Started!")
         print("Type your queries or 'quit' to exit.")
         while True:
@@ -167,10 +168,9 @@ class MCP_ChatBot:
                     
             except Exception as e:
                 print(f"\nError: {str(e)}")
-        
-        
-    
+
     async def cleanup(self):
+        """Clean up resources and close connections."""
         try:
             # Close the exit stack which will handle session cleanup
             try:
@@ -182,21 +182,3 @@ class MCP_ChatBot:
                     print(f"Warning: Error during exit stack cleanup: {str(e)}")
         except Exception as e:
             print(f"Warning: Error during cleanup: {str(e)}")
-
-
-async def main():
-    chatbot = MCP_ChatBot()
-    try:
-        # the mcp clients and sessions are not initialized using "with"
-        # like in the previous lesson
-        # so the cleanup should be manually handled
-        await chatbot.connect_to_servers() # new! 
-        await chatbot.chat_loop()
-    finally:
-        await chatbot.cleanup() #new! 
-        
-if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\nProgram terminated by user.")

@@ -15,6 +15,14 @@ def run_mcp_server():
         print(f"Error running MCP server: {str(e)}")
         sys.exit(1)
 
+async def shutdown():
+    print("\nShutdown signal received...")
+    tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+    [task.cancel() for task in tasks]
+    await asyncio.gather(*tasks, return_exceptions=True)
+    loop = asyncio.get_running_loop()
+    loop.stop()
+
 async def main():
     # Set up signal handlers for graceful shutdown
     loop = asyncio.get_running_loop()
@@ -37,14 +45,6 @@ async def main():
             await chatbot.cleanup()
         except Exception as e:
             print(f"Error during cleanup: {str(e)}")
-
-async def shutdown():
-    print("\nShutdown signal received...")
-    tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
-    [task.cancel() for task in tasks]
-    await asyncio.gather(*tasks, return_exceptions=True)
-    loop = asyncio.get_running_loop()
-    loop.stop()
 
 if __name__ == "__main__":
     try:
